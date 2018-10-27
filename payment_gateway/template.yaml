@@ -1,9 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-    sample API
-
-    SAM Template for sample API
+    LifeBinder Payment Gateway API
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -13,6 +11,8 @@ Globals:
         Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
             Variables:
                 NODE_ENV: !Ref StageNameParam
+                AWS_DEPLOYED_REGION: !Ref "AWS::Region"
+                PAYMENT_GATEWAY_TABLE: !Sub "lbpaymentgateway${StageNameParam}"
         Tags:
             Application: LifeBinder
             Purpose: PaymentGateway
@@ -33,6 +33,7 @@ Resources:
             Handler: lambda.handler
             Policies:
               - AWSLambdaBasicExecutionRole
+              - !Ref LifeBinderLambdaManagedPolicy
             Events:
                 ApiProxy:
                     Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
@@ -40,6 +41,46 @@ Resources:
                         Path: /{proxy+}
                         Method: ANY
                         RestApiId: !Ref ApiGatewayApi
+
+    LifeBinderLambdaManagedPolicy:
+        Type: AWS::IAM::ManagedPolicy
+        Properties:
+            Description: Allows the application to access the LifeBinder DynamoDB table
+            Path: "/application/"
+            PolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    -
+                        Sid: "DynamoDBAccess"
+                        Effect: "Allow"
+                        Action:
+                          - "dynamodb:BatchGetItem"
+                          - "dynamodb:BatchWriteItem"
+                          - "dynamodb:DeleteItem"
+                          - "dynamodb:DescribeTable"
+                          - "dynamodb:GetItem"
+                          - "dynamodb:PutItem"
+                          - "dynamodb:Query"
+                          - "dynamodb:Scan"
+                          - "dynamodb:UpdateItem"
+                        Resource: !GetAtt LifeBinderDynamoDB.Arn
+            ManagedPolicyName: !Sub "LifeBinderPaymentGateway-${AWS::StackName}"
+
+    LifeBinderDynamoDB:
+      Type: AWS::Serverless::SimpleTable
+      Properties:
+        TableName: !Sub "lbpaymentgateway${StageNameParam}"
+        PrimaryKey:
+          Name: username
+          Type: String
+        ProvisionedThroughput:
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 2
+        Tags:
+          Application: LifeBinder
+          Purpose: PaymentGateway
+        SSESpecification:
+          SSEEnabled: true
 
     ApiGatewayApi:
         Type: AWS::Serverless::Api
