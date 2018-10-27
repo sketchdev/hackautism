@@ -1,0 +1,77 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    sample API
+
+    SAM Template for sample API
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+    Function:
+        Runtime: nodejs8.10
+        Timeout: 30
+        Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+            Variables:
+                NODE_ENV: !Ref StageNameParam
+        Tags:
+            Application: SAM-Skeleton-Test
+
+Parameters:
+    StageNameParam:
+        Type: String
+        Default: qa
+        Description: API Gateway stage to deploy to
+
+Resources:
+
+    SamFunction:
+        Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+        Properties:
+            Description: Serverless Skeleton API Controller
+            CodeUri: ./
+            Handler: lambda.handler
+            Policies:
+              - AWSLambdaBasicExecutionRole
+            Events:
+                ApiProxy:
+                    Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+                    Properties:
+                        Path: /{proxy+}
+                        Method: ANY
+                        RestApiId: !Ref ApiGatewayApi
+
+    ApiGatewayApi:
+        Type: AWS::Serverless::Api
+        Properties:
+          StageName: !Ref StageNameParam
+          DefinitionBody:
+              swagger: "2.0"
+              info:
+                version: "2018-07-17T17:04:10Z"
+                title:
+                  Fn::Sub: "SAMSkeleton${StageNameParam}"
+              schemes:
+              - "https"
+              paths:
+                /{proxy+}:
+                  x-amazon-apigateway-any-method:
+                    produces:
+                    - "application/json"
+                    parameters:
+                    - name: "proxy"
+                      in: "path"
+                      required: true
+                      type: "string"
+                    responses: {}
+                    x-amazon-apigateway-integration:
+                      uri:
+                        Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SamFunction.Arn}/invocations"
+                      responses:
+                        default:
+                          statusCode: "200"
+                      passthroughBehavior: "when_no_match"
+                      httpMethod: "POST"
+                      cacheKeyParameters:
+                      - "method.request.path.proxy"
+                      contentHandling: "CONVERT_TO_TEXT"
+                      type: "aws_proxy"
