@@ -14,7 +14,8 @@ Globals:
             Variables:
                 NODE_ENV: !Ref StageNameParam
         Tags:
-            Application: SAM-Skeleton-Test
+            Application: LifeBinder
+            Purpose: PaymentGateway
 
 Parameters:
     StageNameParam:
@@ -24,10 +25,10 @@ Parameters:
 
 Resources:
 
-    SamFunction:
+    LifeBinderSamFunction:
         Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
         Properties:
-            Description: Serverless Skeleton API Controller
+            Description: LifeBinder Payment Gateway API Controller
             CodeUri: ./
             Handler: lambda.handler
             Policies:
@@ -49,7 +50,7 @@ Resources:
               info:
                 version: "2018-07-17T17:04:10Z"
                 title:
-                  Fn::Sub: "SAMSkeleton${StageNameParam}"
+                  Fn::Sub: "LBPaymentGateway${StageNameParam}"
               schemes:
               - "https"
               paths:
@@ -65,7 +66,7 @@ Resources:
                     responses: {}
                     x-amazon-apigateway-integration:
                       uri:
-                        Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SamFunction.Arn}/invocations"
+                        Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LifeBinderSamFunction.Arn}/invocations"
                       responses:
                         default:
                           statusCode: "200"

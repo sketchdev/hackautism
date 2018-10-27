@@ -1,3 +1,6 @@
+Hackathon:
+  Attack of the Retreating Invisible Cows
+
 Setup Instructions
 ===================
 
@@ -113,5 +116,30 @@ To deploy the serverless version of this code, you will need to create a secured
 From your command line,
 
   ```Shell
-  aws s3 mb s3://sam-skeleton
+  aws s3 mb s3://com-lifebinder-sam
   ```
+
+
+APPENDIX
+---------
+
+### PCI Loose-Ends ###
+
+PCI at AWS ain't that hard.  There's a couple of things this app needs *for compliance*, but *not* needed for normal functionality.
+
+#### Activity Logging ####
+
+The first step is to create a bucket to hold all the AWS activity logging. From your command line,
+
+   ```Shell
+   aws s3 mb s3://com-lifebinder-pci
+   aws s3api put-bucket-policy --bucket com-lifebinder-pci --policy "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"AWSCloudTrailAclCheck\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"cloudtrail.amazonaws.com\"},\"Action\":\"s3:GetBucketAcl\",\"Resource\":\"arn:aws:s3:::com-lifebinder-pci\"},{\"Sid\":\"AWSCloudTrailWrite\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"cloudtrail.amazonaws.com\"},\"Action\":\"s3:PutObject\",\"Resource\":\"arn:aws:s3:::com-lifebinder-pci\/AWSLogs\/*\",\"Condition\":{\"StringEquals\":{\"s3:x-amz-acl\":\"bucket-owner-full-control\"}}}]}"
+   ```
+
+Now that the bucket is in place, the next step is to configure AWS to log all activity to the newly created
+bucket. From your command line,
+
+   ```Shell
+   aws cloudtrail create-trail --name LifeBinderTrail --s3-bucket-name com-lifebinder-pci --include-global-service-events --is-multi-region-trail
+   aws cloudtrail start-logging --name LifeBinderTrail
+   ```

@@ -1,9 +1,9 @@
 {
-  "name": "ServerlessSkeleton",
-  "version": "0.1.0",
+  "name": "LifeBinderPaymentGateway",
+  "version": "0.0.1",
   "description": "",
   "main": "server.js",
-  "author": "Sketch Development Services",
+  "author": "Attack of the Retreating Invisible Cows",
   "license": "ISC",
   "dependencies": {
     "aws-serverless-express": "^3.3.0",
