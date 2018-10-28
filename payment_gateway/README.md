@@ -162,22 +162,11 @@ deployed the payment gateway with the test key.
 Create a Product and Pricing Plan
 ----------------------------------
 
-Since this is roughly a one-time setup, there doesn't seem to be a need to create this in the payment gateway API. Plus,
-Stripe's UI is a super-easy way to do both the product and pricing plan in a single shot.
+A utility method has been created for setting up products and pricing plans in Stripe. From your command line,
 
- * Navigate to the [product creation](https://dashboard.stripe.com/test/subscriptions/products/create) page
- * Create a new product
-   * Give the product a name (i.e. LifeBinder Web App) and any other optional data you wish to provide
-   * Click "Create product"
- * Add a pricing plan (the recurring frequency of charges to the end users' credit cards)
-   * Give a nickname to the plan (i.e. "Monthly Basic")
-   * Specify the price [per unit]
-   * Choose "Billing Interval"
-   * Click "Add pricing plan"
-     * You should now see the product details screen for what you just created
- * Click on the Pricing Plan row you just added for the new product
-   * Copy the plan's id (begins with "plan_") to provide it to any applications of yours (i.e. LifeBinder Web) that will
-     allow this plan as a selectable option
+  ```Shell
+  node utils/create-product.js
+  ```
 
 
 Deploying the Payment Gateway
