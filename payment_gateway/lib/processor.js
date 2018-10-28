@@ -16,11 +16,14 @@ stripe.setApiVersion('2018-09-24');  // set the stripe version to avoid potentia
  * @returns {Promise.<*>}
  */
 exports.createCustomer = async (sourceApp, userName, paymentTokenId) => {
-  return await stripe.customers.create({
-    description: `Created by LifeBinder Payment Gateway for source app ${sourceApp}.`,
-    source: paymentTokenId,
-    metadata: { paymentGatewayUsername: userName + sourceApp }
-  });
+  return await stripe.customers.create(
+    {
+      description: `Created by LifeBinder Payment Gateway for source app ${sourceApp}.`,
+      source: paymentTokenId,
+      metadata: { paymentGatewayUsername: userName + sourceApp }
+    },
+    { idempotency_key: userName + sourceApp }
+  );
 };
 
 /**
@@ -39,10 +42,10 @@ exports.updateCustomerPayment = async (customerId, paymentTokenId) => {
  * application by not further passing or storing the actual card information through this system.
  *
  * @param card - card is an object with a minimum of the following keys:
- *               number - credit card number (string)
- *               expMonth - credit card expiration month (int)
- *               expYear - credit card expiration year (4-digit int)
- *               cvc - security code on the card (string)
+ *                 number - credit card number (string)
+ *                 expMonth - credit card expiration month (int)
+ *                 expYear - credit card expiration year (4-digit int)
+ *                 cvc - security code on the card (string)
  * @returns {Promise.<*>} - Promise returns a token object; token.id is the important part
  *                          token.card.(id|brand|last4) may be useful too
  */
@@ -55,4 +58,21 @@ exports.tokenizeCardInfo = async (card) => {
       "cvc": card.cvc
     }
   });
+};
+
+/**
+ * Assign the specified customer to a recurring service plan
+ *
+ * @param customerId - the processor's id for the customer
+ * @param planId - the processor's id for the recurring service plan
+ * @returns {Promise.<void>} - Promise returns a subscription, none of which is really valuable for the payment gateway
+ */
+exports.subscribeCustomerToPlan = async (customerId, planId) => {
+  await stripe.subscriptions.create(
+      {
+        customer: customerId,
+        items: [{ plan: planId }]
+      },
+      { idempotency_key: customerId + planId }
+  );
 };

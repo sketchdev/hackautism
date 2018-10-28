@@ -187,6 +187,14 @@ APPENDIX
 =========
 
 
+Calling Applications
+---------------------
+
+Optionally, but **strongly** recommended, applications calling the payment gateway should send a header key of "Source-App" with a value
+of the application's name for the payment gateway to best track who is calling it and how to properly namespace the users inside
+its internal database tracking mechanism. 
+
+
 PCI Loose-Ends
 ---------------
 
