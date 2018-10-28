@@ -1,5 +1,6 @@
 packaged.yaml
 .idea
+.DS_Store
 
 # Logs
 logs
