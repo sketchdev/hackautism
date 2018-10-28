@@ -190,9 +190,34 @@ APPENDIX
 Calling Applications
 ---------------------
 
+### API Keys ###
+
+To access the Payment Gateway, applications will need an API key. To generate one, from your command line,
+
+  ```Shell
+  KEY_ID=`aws apigateway create-api-key --enabled --name <application_name> --query 'id' --output text`
+  aws apigateway create-usage-plan-key --key-type "API_KEY" --usage-plan-id <usage-plan-id> --key-id $KEY_ID
+  
+  #Example:
+    KEY_ID=`aws apigateway create-api-key --enabled --name lifebinder_web --query 'id' --output text`
+    aws apigateway create-usage-plan-key --key-type "API_KEY" --usage-plan-id tf5a54 --key-id $KEY_ID
+  ```
+
+The `usage-plan-id` (and a more fleshed-out version of the above commands) to use can be seen in the output variables from the
+payment gateway deployment. This can be found by opening the CloudFormation stack when logged in to the AWS console and
+browsing to the [stack list](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filter=active&tab=outputs).
+
+
+### Request Headers ###
+
+#### Source App ####
 Optionally, but **strongly** recommended, applications calling the payment gateway should send a header key of "Source-App" with a value
 of the application's name for the payment gateway to best track who is calling it and how to properly namespace the users inside
 its internal database tracking mechanism. 
+
+#### Payment Gateway API Key ####
+The payment gateway requires that applications pass an API key of their own to access the services. The key should be passed in
+with the "x-api-key" header. See the "API Keys" section above for generating Payment Gateway API Keys for this purpose.
 
 
 PCI Loose-Ends

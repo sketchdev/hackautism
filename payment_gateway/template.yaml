@@ -109,6 +109,8 @@ Resources:
                       required: true
                       type: "string"
                     responses: {}
+                    security:
+                    - api_key: []
                     x-amazon-apigateway-integration:
                       uri:
                         Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LifeBinderSamFunction.Arn}/invocations"
@@ -121,3 +123,30 @@ Resources:
                       - "method.request.path.proxy"
                       contentHandling: "CONVERT_TO_TEXT"
                       type: "aws_proxy"
+              securityDefinitions:
+                api_key:
+                  type: "apiKey"
+                  name: "x-api-key"
+                  in: "header"
+
+    ApiGatewayUsagePlan:
+      Type: AWS::ApiGateway::UsagePlan
+      DependsOn:
+      - ApiGatewayApiStage
+      Properties:
+        ApiStages:
+        - ApiId: !Ref ApiGatewayApi
+          Stage: !Ref StageNameParam
+        Description: "Usage plan to allow API Key access to the payment gateway"
+        UsagePlanName: PaymentGatewayAccess
+
+
+Outputs:
+
+    PaymentGatewayApiUrl:
+      Description: "Payment Gateway API endpoint URL for this deployment"
+      Value: !Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/${StageNameParam}"
+
+    CreateAPIKeyInstructions:
+      Description: "Run these commands from the command line to generate API keys for consuming applications"
+      Value: !Sub "KEY_ID=`aws apigateway create-api-key --enabled --name <application_name> --query 'id' --output text` && aws apigateway create-usage-plan-key --key-type \"API_KEY\" --usage-plan-id ${ApiGatewayUsagePlan} --key-id $KEY_ID"
