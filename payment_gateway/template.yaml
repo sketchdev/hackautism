@@ -13,6 +13,7 @@ Globals:
                 NODE_ENV: !Ref StageNameParam
                 AWS_DEPLOYED_REGION: !Ref "AWS::Region"
                 PAYMENT_GATEWAY_TABLE: !Sub "lbpaymentgateway${StageNameParam}"
+                PAYMENT_PROCESSOR_KEY: !Ref ProcessorApiKeyParam
         Tags:
             Application: LifeBinder
             Purpose: PaymentGateway
@@ -22,6 +23,9 @@ Parameters:
         Type: String
         Default: qa
         Description: API Gateway stage to deploy to
+    ProcessorApiKeyParam:
+        Type: String
+        Description: Secret Key for the payment processor API
 
 Resources:
 

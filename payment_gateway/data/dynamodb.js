@@ -18,8 +18,7 @@ exports.createUserPaymentAccount = (sourceApp, userName, customerId) => {
     Item: {
       "username": tableUsername,
       "status": 'active',
-      "processorCustomerId": customerId,
-      "paymentOptions": []
+      "processorCustomerId": customerId
     }
   };
 
