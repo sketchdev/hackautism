@@ -131,6 +131,55 @@ you should be able to run the following commands from the command line on your l
   ```
 
 
+Stripe Payment Processor
+=========================
+
+Create Account
+---------------
+
+Setup begins by going to Stripe's homepage and [signing-up](https://dashboard.stripe.com/register)
+
+ * Fill out all the necessary information
+ * Click the verification link in the email that was sent to you from Stripe for creating a new account
+ * Verify a phone number for your account as well. This is needed before the system will issue card data tokens in place
+   of actual card numbers themselves
+   * Go to Stripe's [phone verification page](https://dashboard.stripe.com/phone-verification)
+
+
+Obtain API Key
+---------------
+
+From Stripe's dashboard page, navigate to Developers > API Keys. Or navigate directly to [API Keys](https://dashboard.stripe.com/account/apikeys).
+
+On this page is the "Secret key". This is required for the deployment step in the "Deploying the Payment Gateway" section below.
+
+If your full business details have not yet been provided to Stripe, the account will be in a test/sandbox mode, and the
+Secret key is just for testing purposes. Once your account has been verified and activated, you will need to revisit this
+section for the actual live/production key. You may need to re-trigger the deployment with the live key if you already
+deployed the payment gateway with the test key.
+
+
+Create a Product and Pricing Plan
+----------------------------------
+
+Since this is roughly a one-time setup, there doesn't seem to be a need to create this in the payment gateway API. Plus,
+Stripe's UI is a super-easy way to do both the product and pricing plan in a single shot.
+
+ * Navigate to the [product creation](https://dashboard.stripe.com/test/subscriptions/products/create) page
+ * Create a new product
+   * Give the product a name (i.e. LifeBinder Web App) and any other optional data you wish to provide
+   * Click "Create product"
+ * Add a pricing plan (the recurring frequency of charges to the end users' credit cards)
+   * Give a nickname to the plan (i.e. "Monthly Basic")
+   * Specify the price [per unit]
+   * Choose "Billing Interval"
+   * Click "Add pricing plan"
+     * You should now see the product details screen for what you just created
+ * Click on the Pricing Plan row you just added for the new product
+   * Copy the plan's id (begins with "plan_") to provide it to any applications of yours (i.e. LifeBinder Web) that will
+     allow this plan as a selectable option
+
+
 Deploying the Payment Gateway
 ==============================
 
