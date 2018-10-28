@@ -18,7 +18,7 @@ stripe.setApiVersion('2018-09-24');  // set the stripe version to avoid potentia
 exports.createCustomer = async (sourceApp, userName, paymentTokenId) => {
   return await stripe.customers.create(
     {
-      description: `${userName} created by LifeBinder Payment Gateway for source app ${sourceApp}.`,
+      description: `${userName} created by PathBinder Payment Gateway for source app ${sourceApp}.`,
       source: paymentTokenId,
       metadata: { paymentGatewayUsername: userName + sourceApp }
     },

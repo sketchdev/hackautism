@@ -114,7 +114,7 @@ To deploy the serverless version of this code, you will need to create a secured
 From your command line,
 
   ```Shell
-  aws s3 mb s3://com-lifebinder-sam
+  aws s3 mb s3://com-pathbinder-sam
   ```
 
 
@@ -197,15 +197,20 @@ To access the Payment Gateway, applications will need an API key. To generate on
   ```Shell
   KEY_ID=`aws apigateway create-api-key --enabled --name <application_name> --query 'id' --output text`
   aws apigateway create-usage-plan-key --key-type "API_KEY" --usage-plan-id <usage-plan-id> --key-id $KEY_ID
+  aws apigateway get-api-key --api-key $KEY_ID --include-value --output text --query 'value'
   
   #Example:
-    KEY_ID=`aws apigateway create-api-key --enabled --name lifebinder_web --query 'id' --output text`
+    KEY_ID=`aws apigateway create-api-key --enabled --name pathbinder_web --query 'id' --output text`
     aws apigateway create-usage-plan-key --key-type "API_KEY" --usage-plan-id tf5a54 --key-id $KEY_ID
+    aws apigateway get-api-key --api-key $KEY_ID --include-value --output text --query 'value'
   ```
 
 The `usage-plan-id` (and a more fleshed-out version of the above commands) to use can be seen in the output variables from the
 payment gateway deployment. This can be found by opening the CloudFormation stack when logged in to the AWS console and
 browsing to the [stack list](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filter=active&tab=outputs).
+
+The output of the last command executed in that set is the API key that you should use in the applications wishing to
+call the Payment Gateway's service.
 
 
 ### Request Headers ###
@@ -230,14 +235,14 @@ PCI at AWS ain't that hard.  There's a couple of things this app needs *for comp
 The first step is to create a bucket to hold all the AWS activity logging. From your command line,
 
    ```Shell
-   aws s3 mb s3://com-lifebinder-pci
-   aws s3api put-bucket-policy --bucket com-lifebinder-pci --policy "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"AWSCloudTrailAclCheck\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"cloudtrail.amazonaws.com\"},\"Action\":\"s3:GetBucketAcl\",\"Resource\":\"arn:aws:s3:::com-lifebinder-pci\"},{\"Sid\":\"AWSCloudTrailWrite\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"cloudtrail.amazonaws.com\"},\"Action\":\"s3:PutObject\",\"Resource\":\"arn:aws:s3:::com-lifebinder-pci\/AWSLogs\/*\",\"Condition\":{\"StringEquals\":{\"s3:x-amz-acl\":\"bucket-owner-full-control\"}}}]}"
+   aws s3 mb s3://com-pathbinder-pci
+   aws s3api put-bucket-policy --bucket com-pathbinder-pci --policy "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"AWSCloudTrailAclCheck\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"cloudtrail.amazonaws.com\"},\"Action\":\"s3:GetBucketAcl\",\"Resource\":\"arn:aws:s3:::com-lifebinder-pci\"},{\"Sid\":\"AWSCloudTrailWrite\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"cloudtrail.amazonaws.com\"},\"Action\":\"s3:PutObject\",\"Resource\":\"arn:aws:s3:::com-lifebinder-pci\/AWSLogs\/*\",\"Condition\":{\"StringEquals\":{\"s3:x-amz-acl\":\"bucket-owner-full-control\"}}}]}"
    ```
 
 Now that the bucket is in place, the next step is to configure AWS to log all activity to the newly created
 bucket. From your command line,
 
    ```Shell
-   aws cloudtrail create-trail --name LifeBinderTrail --s3-bucket-name com-lifebinder-pci --include-global-service-events --is-multi-region-trail
-   aws cloudtrail start-logging --name LifeBinderTrail
+   aws cloudtrail create-trail --name PathBinderTrail --s3-bucket-name com-pathbinder-pci --include-global-service-events --is-multi-region-trail
+   aws cloudtrail start-logging --name PathBinderTrail
    ```

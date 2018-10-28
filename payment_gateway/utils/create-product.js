@@ -44,7 +44,7 @@ const createProductPlan = async (productName, planAmount, interval) => {
   console.log('');
   console.log(`Plan ID = ${plan.id}`);
   console.log('');
-  console.log('Copy this plan id to provide it to any applications of yours (i.e. LifeBinder Web) that will allow this plan as a selectable option.');
+  console.log('Copy this plan id to provide it to any applications of yours (i.e. PathBinder Web) that will allow this plan as a selectable option.');
   console.log('You can find this plan id again by viewing plans on your Stripe dashboard in the Billing > Products section at https://dashboard.stripe.com/test/subscriptions/products');
   console.log('');
   console.log('');

@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-    LifeBinder Payment Gateway API
+    PathBinder Payment Gateway API
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -12,10 +12,10 @@ Globals:
             Variables:
                 NODE_ENV: !Ref StageNameParam
                 AWS_DEPLOYED_REGION: !Ref "AWS::Region"
-                PAYMENT_GATEWAY_TABLE: !Sub "lbpaymentgateway${StageNameParam}"
+                PAYMENT_GATEWAY_TABLE: !Sub "pbpaymentgateway${StageNameParam}"
                 PAYMENT_PROCESSOR_KEY: !Ref ProcessorApiKeyParam
         Tags:
-            Application: LifeBinder
+            Application: PathBinder
             Purpose: PaymentGateway
 
 Parameters:
@@ -29,15 +29,15 @@ Parameters:
 
 Resources:
 
-    LifeBinderSamFunction:
+    PathBinderSamFunction:
         Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
         Properties:
-            Description: LifeBinder Payment Gateway API Controller
+            Description: PathBinder Payment Gateway API Controller
             CodeUri: ./
             Handler: lambda.handler
             Policies:
               - AWSLambdaBasicExecutionRole
-              - !Ref LifeBinderLambdaManagedPolicy
+              - !Ref PathBinderLambdaManagedPolicy
             Events:
                 ApiProxy:
                     Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
@@ -46,10 +46,10 @@ Resources:
                         Method: ANY
                         RestApiId: !Ref ApiGatewayApi
 
-    LifeBinderLambdaManagedPolicy:
+    PathBinderLambdaManagedPolicy:
         Type: AWS::IAM::ManagedPolicy
         Properties:
-            Description: Allows the application to access the LifeBinder DynamoDB table
+            Description: Allows the application to access the PathBinder DynamoDB table
             Path: "/application/"
             PolicyDocument:
                 Version: "2012-10-17"
@@ -67,13 +67,13 @@ Resources:
                           - "dynamodb:Query"
                           - "dynamodb:Scan"
                           - "dynamodb:UpdateItem"
-                        Resource: !GetAtt LifeBinderDynamoDB.Arn
-            ManagedPolicyName: !Sub "LifeBinderPaymentGateway-${AWS::StackName}"
+                        Resource: !GetAtt PathBinderDynamoDB.Arn
+            ManagedPolicyName: !Sub "PathBinderPaymentGateway-${AWS::StackName}"
 
-    LifeBinderDynamoDB:
+    PathBinderDynamoDB:
       Type: AWS::Serverless::SimpleTable
       Properties:
-        TableName: !Sub "lbpaymentgateway${StageNameParam}"
+        TableName: !Sub "pbpaymentgateway${StageNameParam}"
         PrimaryKey:
           Name: username
           Type: String
@@ -81,7 +81,7 @@ Resources:
           ReadCapacityUnits: 2
           WriteCapacityUnits: 2
         Tags:
-          Application: LifeBinder
+          Application: PathBinder
           Purpose: PaymentGateway
         SSESpecification:
           SSEEnabled: true
@@ -95,7 +95,7 @@ Resources:
               info:
                 version: "2018-07-17T17:04:10Z"
                 title:
-                  Fn::Sub: "LBPaymentGateway${StageNameParam}"
+                  Fn::Sub: "PBPaymentGateway${StageNameParam}"
               schemes:
               - "https"
               paths:
@@ -113,7 +113,7 @@ Resources:
                     - api_key: []
                     x-amazon-apigateway-integration:
                       uri:
-                        Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LifeBinderSamFunction.Arn}/invocations"
+                        Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PathBinderSamFunction.Arn}/invocations"
                       responses:
                         default:
                           statusCode: "200"
@@ -148,5 +148,5 @@ Outputs:
       Value: !Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/${StageNameParam}"
 
     CreateAPIKeyInstructions:
-      Description: "Run these commands from the command line to generate API keys for consuming applications"
-      Value: !Sub "KEY_ID=`aws apigateway create-api-key --enabled --name <application_name> --query 'id' --output text` && aws apigateway create-usage-plan-key --key-type \"API_KEY\" --usage-plan-id ${ApiGatewayUsagePlan} --key-id $KEY_ID"
+      Description: "Run these commands from the command line to generate API keys for consuming applications. **BE SURE to change 'APPLICATION_NAME' to your actual application name"
+      Value: !Sub "KEY_ID=`aws apigateway create-api-key --enabled --name APPLICATION_NAME --query 'id' --output text` && aws apigateway create-usage-plan-key --key-type \"API_KEY\" --usage-plan-id ${ApiGatewayUsagePlan} --key-id $KEY_ID && aws apigateway get-api-key --api-key $KEY_ID --include-value --output text --query 'value'"
