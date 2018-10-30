@@ -114,7 +114,7 @@ To deploy the serverless version of this code, you will need to create a secured
 From your command line,
 
   ```Shell
-  aws s3 mb s3://com-pathbinder-sam
+  aws s3 mb s3://pathbinder-sam
   ```
 
 
